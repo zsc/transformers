@@ -922,8 +922,13 @@ class BloomForCausalLM(BloomPreTrainedModel):
             return_dict=return_dict,
         )
         hidden_states = transformer_outputs[0]
-
+        
+        #lm_logits = self.lm_head(hidden_states)
+        self.lm_head.to(hidden_states.device)
         lm_logits = self.lm_head(hidden_states)
+        #self.lm_head.to(old_device)
+        self.lm_head.to("cuda:0") # hard code because when lm_head is wrapped into a nn.Sequential, it has no deivce.
+        labels = labels.to("cuda:7")
 
         loss = None
         if labels is not None:
